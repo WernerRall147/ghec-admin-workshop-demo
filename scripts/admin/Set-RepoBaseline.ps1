@@ -155,3 +155,6 @@ if ($PSCmdlet.ShouldProcess($Repo, "Create or update ruleset '$RulesetName' ($En
 }
 
 Write-Host "Done. Review: https://github.com/$Repo/settings/rules" -ForegroundColor Cyan
+
+# API failures above are handled (reported as n/a); don't leak the last native exit code to callers/CI.
+$global:LASTEXITCODE = 0

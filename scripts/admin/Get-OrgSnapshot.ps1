@@ -143,3 +143,6 @@ if ($OutFile) {
     Write-Host "Snapshot written to $OutFile" -ForegroundColor Green
 }
 $text
+
+# API failures above are handled (reported as n/a); don't leak the last native exit code to callers/CI.
+$global:LASTEXITCODE = 0

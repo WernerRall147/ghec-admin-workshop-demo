@@ -56,7 +56,7 @@ try {
         git cat-file -e "HEAD:$($b.Path)" 2>$null
         $b | Add-Member -NotePropertyName AtHEAD -NotePropertyValue ($LASTEXITCODE -eq 0)
     }
-    $blobs | Format-Table -AutoSize
+    $blobs | Format-Table -AutoSize | Out-Host
     $hidden = @($blobs | Where-Object { -not $_.AtHEAD -and $_.SizeMB -ge 1 })
     Write-Check ($hidden.Count -eq 0) "$($hidden.Count) large file(s) deleted from HEAD but still in history (every clone downloads them)"
 

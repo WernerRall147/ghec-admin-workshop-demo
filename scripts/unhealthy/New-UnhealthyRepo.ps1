@@ -17,6 +17,11 @@
 .EXAMPLE
     # Create + publish. Re-run with -Force to reset the demo after a history rewrite.
     ./New-UnhealthyRepo.ps1 -Path C:\Git\ghec-admin-workshop-unhealthy -Publish -Repo my-user/ghec-admin-workshop-unhealthy -Force
+
+.EXAMPLE
+    # Also publish a "manual migration" copy (main + one tag only) for Compare-MigratedRepo.ps1
+    ./New-UnhealthyRepo.ps1 -Path C:\Git\ghec-admin-workshop-unhealthy -Publish -Repo my-user/ghec-admin-workshop-unhealthy `
+        -MigratedRepo my-user/ghec-admin-workshop-migrated -Force
 #>
 [CmdletBinding()]
 param(
@@ -32,6 +37,10 @@ param(
 
     [ValidatePattern('^[^/\s]+/[^/\s]+$')]
     [string]$Repo,
+
+    # Optional: simulate an incomplete manual migration (only main and tag v0.2 are pushed)
+    [ValidatePattern('^[^/\s]+/[^/\s]+$')]
+    [string]$MigratedRepo,
 
     [switch]$Force
 )
@@ -127,6 +136,17 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Push failed' }
         git branch --set-upstream-to=origin/main main | Out-Null
         Write-Host "Published to https://github.com/$Repo" -ForegroundColor Green
+
+        if ($MigratedRepo) {
+            gh repo view $MigratedRepo --json name 2>$null | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                gh repo create $MigratedRepo --private --description 'Simulated manual migration (only main + one tag were pushed) for the migration validation demo.' | Out-Null
+            }
+            # A typical manual migration: only the default branch and one tag were pushed.
+            git push --quiet --force --prune "https://github.com/$MigratedRepo.git" 'refs/heads/main:refs/heads/main' 'refs/tags/v0.2:refs/tags/v0.2'
+            if ($LASTEXITCODE -ne 0) { throw 'Push to the migrated repository failed' }
+            Write-Host "Published partial 'manual migration' to https://github.com/$MigratedRepo" -ForegroundColor Green
+        }
     }
 } finally {
     Pop-Location

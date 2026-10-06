@@ -7,7 +7,8 @@
 //
 // Usage (two terminals):
 //   1) $env:WEBHOOK_SECRET = 'workshop-demo'; node scripts/api/webhook-receiver.js
-//   2) gh webhook forward --repo=OWNER/REPO --events=issues,issue_comment,pull_request,push,status `
+//   2) $env:GH_TOKEN = gh auth token   # the gh-webhook extension cannot read the OS keyring
+//      gh webhook forward --repo=OWNER/REPO --events=issues,issue_comment,pull_request,push,status `
 //        --url=http://localhost:3000/webhook --secret=workshop-demo
 //
 // Then open an issue, comment on a PR or push a commit and watch the events arrive.

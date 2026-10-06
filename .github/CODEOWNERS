@@ -1,0 +1,11 @@
+# CODEOWNERS — who must review changes to which paths.
+# Rules are evaluated top to bottom; the LAST matching pattern wins.
+# In an organization, prefer TEAMS over individuals so ownership survives people changes, e.g.:
+#   /.github/workflows/   @your-org/platform-admins
+#   /docs/                @your-org/tech-writers
+
+*                     @WernerRall147
+/.github/             @WernerRall147
+/.github/workflows/   @WernerRall147
+/docs/                @WernerRall147
+/scripts/             @WernerRall147

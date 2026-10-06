@@ -1,0 +1,62 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "labs/**"
+      - "**.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  staging:
+    name: Deploy to staging
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Deploy (simulated)
+        id: deploy
+        env:
+          APP_NAME: ${{ vars.APP_NAME }}
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          repo="${GITHUB_REPOSITORY#*/}"
+          echo "Deploying ${APP_NAME:-app} @ ${GITHUB_SHA::7} to STAGING..."
+          echo "url=https://${owner}.github.io/${repo}/?env=staging" >> "$GITHUB_OUTPUT"
+          echo "### Deployed \`${GITHUB_SHA::7}\` to **staging**" >> "$GITHUB_STEP_SUMMARY"
+
+  production:
+    name: Deploy to production
+    needs: staging
+    runs-on: ubuntu-latest
+    # The "production" environment requires an approval and only accepts deployments from main.
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Deploy (simulated) using an environment-scoped secret
+        id: deploy
+        env:
+          APP_NAME: ${{ vars.APP_NAME }}
+          DEPLOY_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          repo="${GITHUB_REPOSITORY#*/}"
+          if [ -z "$DEPLOY_API_KEY" ]; then
+            echo "::warning::The DEPLOY_API_KEY environment secret is not set"
+          fi
+          # Secrets are masked in logs - this line prints *** instead of the value.
+          echo "Using deployment key: $DEPLOY_API_KEY"
+          echo "Deploying ${APP_NAME:-app} @ ${GITHUB_SHA::7} to PRODUCTION..."
+          echo "url=https://${owner}.github.io/${repo}/?env=production" >> "$GITHUB_OUTPUT"
+          echo "### Deployed \`${GITHUB_SHA::7}\` to **production**" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,32 @@
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8d96a0;
+  --accent: #3fb950;
+  --link: #58a6ff;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 48px clamp(16px, 5vw, 72px);
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+.eyebrow { color: var(--accent); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: 13px; margin: 0; }
+h1 { font-size: 40px; margin: 8px 0 12px; }
+.lead { color: var(--muted); max-width: 760px; }
+.badge { display: inline-block; padding: 4px 12px; border: 1px solid var(--accent); border-radius: 999px; color: var(--accent); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 32px; }
+.card { display: block; padding: 20px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; color: inherit; text-decoration: none; transition: border-color .15s, transform .15s; }
+.card:hover { border-color: var(--link); transform: translateY(-2px); }
+.card h2 { margin: 0 0 6px; font-size: 18px; color: var(--link); }
+.card p { margin: 0; color: var(--muted); font-size: 14px; }
+footer { margin-top: 48px; color: var(--muted); font-size: 14px; }
+footer a, .report a { color: var(--link); }
+.report { max-width: 760px; }
+.report table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+.report th, .report td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.report .pass { color: var(--accent); font-weight: 600; }

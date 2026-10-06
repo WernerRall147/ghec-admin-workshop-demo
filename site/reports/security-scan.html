@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>External security scan – report</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <main class="report">
+    <p class="eyebrow">Simulated third-party tool</p>
+    <h1>Security scan report</h1>
+    <p class="lead">This is the <code>target_url</code> that the external scanner attaches to its commit status
+      (context <code>external/security-scan</code>). In a real integration it would link to the tool's report
+      for the exact commit, and the <strong>Details</strong> link on the pull request would open it.</p>
+    <table>
+      <tr><th>Check</th><th>Result</th></tr>
+      <tr><td>Dependency licences</td><td class="pass">Passed</td></tr>
+      <tr><td>Container image baseline</td><td class="pass">Passed</td></tr>
+      <tr><td>Infrastructure-as-code policy</td><td class="pass">Passed</td></tr>
+    </table>
+    <p>Learn more: <a href="https://docs.github.com/en/rest/commits/statuses">REST API endpoints for commit statuses</a></p>
+    <p><a href="../">← Back to the demo portal</a></p>
+  </main>
+</body>
+</html>

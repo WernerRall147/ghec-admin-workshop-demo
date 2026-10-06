@@ -1,0 +1,17 @@
+{
+  "name": "ghec-admin-workshop-demo",
+  "version": "1.0.0",
+  "description": "Tiny sample app used to demonstrate GitHub Enterprise Cloud administration features",
+  "main": "src/marks.js",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "lodash": "4.17.15"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

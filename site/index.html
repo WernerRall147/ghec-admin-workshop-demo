@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GHEC Admin Workshop – Demo portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <p class="eyebrow">GitHub Enterprise Cloud · Administrator workshop</p>
+    <h1>Demo portal</h1>
+    <p class="lead">Every link below opens the part of the demo repository that shows an admin feature in action.
+      This page itself is published with <strong>GitHub Pages</strong> from a GitHub Actions workflow.</p>
+    <p id="env" class="badge" hidden></p>
+  </header>
+
+  <main class="grid">
+    <a class="card" data-path="/settings/rules"><h2>Rulesets</h2><p>Protected default branch, required checks, bypass list and rule insights.</p></a>
+    <a class="card" data-path="/pulls"><h2>Pull requests</h2><p>Blocked by a failing check, waiting for a third-party status, waiting for a code owner.</p></a>
+    <a class="card" data-path="/actions"><h2>Actions</h2><p>CI, deployments with approvals, Pages and a governance report.</p></a>
+    <a class="card" data-path="/deployments"><h2>Environments</h2><p>Staging → production with a required reviewer and environment secrets.</p></a>
+    <a class="card" data-path="/security"><h2>Security</h2><p>Dependabot, code scanning with Copilot Autofix, secret scanning.</p></a>
+    <a class="card" data-path="/blob/main/.github/CODEOWNERS"><h2>CODEOWNERS</h2><p>Automatic review requests per path.</p></a>
+    <a class="card" data-path="/tree/main/scripts"><h2>Scripts</h2><p>REST vs GraphQL, Status API, webhooks, audit log, health reports.</p></a>
+    <a class="card" data-path="/tree/main/labs"><h2>Labs</h2><p>Hands-on exercises to repeat everything in your own organization.</p></a>
+  </main>
+
+  <footer>Built from <a id="repo-link">the demo repository</a>.</footer>
+
+  <script>
+    // Works for any copy of the template: https://OWNER.github.io/REPO/
+    const owner = location.hostname.split('.')[0];
+    const repo = location.pathname.split('/').filter(Boolean)[0] || '';
+    const base = `https://github.com/${owner}/${repo}`;
+    document.querySelectorAll('[data-path]').forEach((a) => { a.href = base + a.dataset.path; });
+    document.getElementById('repo-link').href = base;
+    const env = new URLSearchParams(location.search).get('env');
+    if (env) {
+      const badge = document.getElementById('env');
+      badge.textContent = `Deployment target: ${env}`;
+      badge.hidden = false;
+    }
+  </script>
+</body>
+</html>

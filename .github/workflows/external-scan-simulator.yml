@@ -1,0 +1,45 @@
+name: External scan simulator (Status API)
+
+# Fallback for the live demo: simulates a third-party tool that reports its result on a
+# pull request using the Commit Status API (context "external/security-scan").
+# The primary demo runs scripts/api/Set-ExternalStatus.ps1 from a laptop instead.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number to report on
+        required: true
+      state:
+        description: Result to report
+        type: choice
+        options: [success, failure, pending, error]
+        default: success
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post a commit status as a "third-party" tool
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Inputs are passed through environment variables, never interpolated into the script,
+          # to avoid script injection.
+          PR: ${{ inputs.pr }}
+          STATE: ${{ inputs.state }}
+        run: |
+          sha=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json headRefOid --jq .headRefOid)
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          repo="${GITHUB_REPOSITORY#*/}"
+          gh api "repos/$GITHUB_REPOSITORY/statuses/$sha" \
+            -f state="$STATE" \
+            -f context="external/security-scan" \
+            -f description="Simulated third-party security scan: $STATE" \
+            -f target_url="https://${owner}.github.io/${repo}/reports/security-scan.html" \
+            --jq '"Posted " + .state + " for " + .context'
+          echo "Reported **$STATE** on PR #$PR (\`${sha::7}\`)" >> "$GITHUB_STEP_SUMMARY"

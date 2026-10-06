@@ -1,0 +1,39 @@
+name: Governance report
+
+# Admin automation example: run a repository health report on demand (or on a schedule)
+# and publish it as the job summary.
+#
+# The GITHUB_TOKEN only has access to THIS repository. To report on a whole organization,
+# mint a short-lived GitHub App installation token instead of using a personal token:
+#
+#   - uses: actions/create-github-app-token@<sha> # pin to a release SHA
+#     id: app-token
+#     with:
+#       app-id: ${{ vars.GOVERNANCE_APP_ID }}
+#       private-key: ${{ secrets.GOVERNANCE_APP_PRIVATE_KEY }}
+#       owner: ${{ github.repository_owner }}
+#   ...then set GH_TOKEN: ${{ steps.app-token.outputs.token }} and drop the -Repo filter.
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "0 6 * * 1" # every Monday 06:00 UTC
+
+permissions:
+  contents: read
+  security-events: read # lets the report count open Dependabot alerts
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Repository health report
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ./scripts/admin/Get-RepoHealthReport.ps1 -Owner $env:GITHUB_REPOSITORY_OWNER `
+            -Repo ($env:GITHUB_REPOSITORY -split '/')[1] -Format Markdown |
+            Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8

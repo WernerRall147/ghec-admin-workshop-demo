@@ -79,9 +79,9 @@ if (-not $Quiet) {
         'Tags (src/dst)'         = "$(& $count $src 'tags') / $(& $count $dst 'tags')"
         'Default branch (src/dst)' = "$srcDefault / $dstDefault"
         'Refs with problems'     = $problems.Count
-    } | Format-List
+    } | Format-List | Out-Host
     if ($problems.Count -gt 0) {
-        $problems | Format-Table -AutoSize
+        $problems | Format-Table -AutoSize | Out-Host
     }
     if ($srcDefault -ne $dstDefault) {
         Write-Host "Default branch differs ($srcDefault vs $dstDefault) - intended rename, or a migration mistake?" -ForegroundColor Yellow

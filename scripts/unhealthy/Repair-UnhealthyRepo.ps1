@@ -74,13 +74,15 @@ $env:GIT_DIR = '.'
 try {
     $before = Get-Stats
     Write-Host "    before: $($before.SizeMB) MB, $($before.Commits) commits, $($before.Branches) branches, main = $($before.MainSha)"
-    Write-Host "    secret file history before:" -NoNewline; Write-Host " $(@(git log --all --oneline -- $RemovePaths).Count) commit(s) touch $($RemovePaths -join ', ')"
+    Write-Host "    secret file history before: $(@(git log --all --oneline -- $RemovePaths).Count) commit(s) touch $($RemovePaths -join ', ')"
 
     Write-Host "2/5 Rewriting history: removing $($RemovePaths -join ', ') and blobs > $StripBlobsBiggerThan" -ForegroundColor Cyan
     $frArgs = @('--quiet', '--invert-paths')
     foreach ($p in $RemovePaths) { $frArgs += @('--path', $p) }
     $frArgs += @('--strip-blobs-bigger-than', $StripBlobsBiggerThan)
-    & $filterRepo $frArgs
+    # "git remote rm origin" (run by filter-repo) prints a harmless note for mirror clones - hide it.
+    & $filterRepo $frArgs 2>&1 | ForEach-Object { "$_" } |
+        Where-Object { $_ -notmatch '^(Note: Some branches outside the refs/remotes|to delete them, use:|\s+git branch -d )' }
     if ($LASTEXITCODE -ne 0) { throw 'git filter-repo failed' }
 
     if ($DeleteStaleBranches) {
@@ -100,7 +102,7 @@ try {
     [pscustomobject]@{ Metric = 'Packed size (MB)'; Before = $before.SizeMB; After = $after.SizeMB },
     [pscustomobject]@{ Metric = 'Commits'; Before = $before.Commits; After = $after.Commits },
     [pscustomobject]@{ Metric = 'Branches'; Before = $before.Branches; After = $after.Branches },
-    [pscustomobject]@{ Metric = 'main commit SHA'; Before = $before.MainSha; After = $after.MainSha } | Format-Table -AutoSize
+    [pscustomobject]@{ Metric = 'main commit SHA'; Before = $before.MainSha; After = $after.MainSha } | Format-Table -AutoSize | Out-Host
     Write-Host "    secret file history after: $(@(git log --all --oneline -- $RemovePaths).Count) commit(s)"
     Write-Host '    Every rewritten commit has a NEW SHA - old clones, forks and open PRs no longer match.' -ForegroundColor Yellow
     $map = Join-Path $WorkDir 'filter-repo/commit-map'

@@ -45,9 +45,24 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Retries transient network/API failures so a live demo survives a flaky connection.
+function Invoke-GhWithRetry([string[]]$GhArgs, [int]$Attempts = 3) {
+    for ($a = 1; $a -le $Attempts; $a++) {
+        $out = & gh @GhArgs 2>&1
+        if ($LASTEXITCODE -eq 0) { return $out }
+        if ($a -lt $Attempts) {
+            Write-Host "  (GitHub API call failed - retrying in $($a * 2)s)" -ForegroundColor DarkYellow
+            Start-Sleep -Seconds ($a * 2)
+        }
+    }
+    throw "gh $($GhArgs[0..1] -join ' ') failed after $Attempts attempts: $($out -join ' ')"
+}
+
 if ($PSCmdlet.ParameterSetName -eq 'PullRequest') {
-    $Sha = gh pr view $PullRequest --repo $Repo --json headRefOid --jq .headRefOid
-    if ($LASTEXITCODE -ne 0 -or -not $Sha) { throw "Could not find pull request #$PullRequest in $Repo" }
+    $commitSha = "$(Invoke-GhWithRetry @('pr', 'view', "$PullRequest", '--repo', $Repo, '--json', 'headRefOid', '--jq', '.headRefOid'))".Trim()
+    if ($commitSha -notmatch '^[0-9a-f]{40}$') { throw "Could not find pull request #$PullRequest in $Repo" }
+} else {
+    $commitSha = $Sha
 }
 
 if (-not $TargetUrl) {
@@ -56,14 +71,13 @@ if (-not $TargetUrl) {
 }
 
 function Set-CommitStatus([string]$State, [string]$Description) {
-    $line = gh api "repos/$Repo/statuses/$Sha" `
-        -f state=$State -f context=$Context -f description=$Description -f target_url=$TargetUrl `
-        --jq '"  -> " + .state + "  [" + .context + "]  " + .description'
-    if ($LASTEXITCODE -ne 0) { throw "Failed to post status '$State'" }
+    $line = Invoke-GhWithRetry @('api', "repos/$Repo/statuses/$commitSha",
+        '-f', "state=$State", '-f', "context=$Context", '-f', "description=$Description", '-f', "target_url=$TargetUrl",
+        '--jq', '"  -> " + .state + "  [" + .context + "]  " + .description')
     Write-Host $line
 }
 
-Write-Host "External scanner picked up commit $($Sha.Substring(0, 7)) in $Repo" -ForegroundColor Cyan
+Write-Host "External scanner picked up commit $($commitSha.Substring(0, 7)) in $Repo" -ForegroundColor Cyan
 Set-CommitStatus -State 'pending' -Description 'Security scan in progress...'
 
 for ($i = 1; $i -le $ScanSeconds; $i++) {
@@ -80,5 +94,5 @@ $description = switch ($Result) {
 $colour = if ($Result -eq 'success') { 'Green' } else { 'Red' }
 Set-CommitStatus -State $Result -Description $description
 
-$combined = gh api "repos/$Repo/commits/$Sha/status" --jq '.state'
+$combined = Invoke-GhWithRetry @('api', "repos/$Repo/commits/$commitSha/status", '--jq', '.state')
 Write-Host "Combined commit status (all contexts) is now: $combined" -ForegroundColor $colour

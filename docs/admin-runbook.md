@@ -42,3 +42,9 @@ Adapt the frequency and owners to your organization.
 2. Check the audit log and the provider's logs for misuse.
 3. Remove it from history only if needed (`scripts/unhealthy/Repair-UnhealthyRepo.ps1`) and coordinate a re-clone.
 4. Enable or verify **push protection** so it cannot happen again.
+
+## Quarterly: GitHub App permission review
+
+1. Organization -> Settings -> GitHub Apps: list every installed app.
+2. For each app, compare *requested* permissions with what it actually needs.
+3. Remove apps nobody owns; record the owner of every remaining app.

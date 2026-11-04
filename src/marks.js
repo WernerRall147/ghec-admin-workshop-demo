@@ -39,4 +39,12 @@ function result(mark) {
   return 'Fail';
 }
 
-module.exports = { finalMark, result };
+/**
+ * Students with a final mark from 40 up to (but excluding) 50 may write a supplementary exam.
+ * @param {number} mark
+ */
+function isSupplementaryEligible(mark) {
+  return mark >= 40 && mark < 50;
+}
+
+module.exports = { finalMark, result, isSupplementaryEligible };

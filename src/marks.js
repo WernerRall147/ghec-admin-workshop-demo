@@ -39,4 +39,13 @@ function result(mark) {
   return 'Fail';
 }
 
-module.exports = { finalMark, result };
+/**
+ * Adds bonus marks, never exceeding 100.
+ * @param {number} mark
+ * @param {number} bonus
+ */
+function applyBonus(mark, bonus) {
+  return mark + bonus;
+}
+
+module.exports = { finalMark, result, applyBonus };
